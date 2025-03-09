@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nike Giveaway</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        html, body {
+            margin: 0; padding: 0; overflow: hidden;
+            height: 100%; width: 100%; background: black;
+            font-family: 'Roboto', sans-serif;
+        }
+        video {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        #participate-btn {
+            position: absolute;
+            bottom: 20%; left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 35px; font-size: 19px;
+            color: #fff; font-weight: bold;
+            border-radius: 12px;
+            background: rgba(0, 150, 255, 0.4);
+            border: 2px solid rgba(0, 150, 255, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 25px rgba(0, 150, 255, 1);
+            cursor: pointer; transition: all 0.3s;
+            z-index: 999;
+        }
+        #participate-btn.registered {
+            background: rgba(0, 200, 50, 0.5);
+            border-color: rgba(0, 200, 50, 0.9);
+            box-shadow: 0 0 25px rgba(0, 200, 50, 1);
+        }
+        #timer-block {
+            position: absolute; bottom: 10%; left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 18px;
+            color: white; font-size: 17px; font-weight: 700;
+            background: rgba(20, 20, 20, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 10px; text-shadow: 1px 1px 5px #000;
+            display: none; z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop playsinline>
+        <source src="video.mp4" type="video/mp4">
+    </video>
+
+    <button id="participate-btn">PARTICIPATE</button>
+    <div id="timer-block">Ends in: <span id="timer"></span></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready(); tg.expand();
+
+        const btn = document.getElementById('participate-btn');
+        const timerBlock = document.getElementById('timer-block');
+        const timer = document.getElementById('timer');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedEndTime = localStorage.getItem('nikeGiveawayEnd');
+            if (storedEndTime && storedEndTime > Date.now()) {
+                activateRegisteredState(parseInt(storedEndTime));
+            }
+        });
+
+        btn.onclick = function() {
+            const currentEndTime = localStorage.getItem('nikeGiveawayEnd');
+            if (currentEndTime && currentEndTime > Date.now()) return;
+
+            const endTime = Date.now() + 14 * 24 * 60 * 60 * 1000;
+            localStorage.setItem('nikeGiveawayEnd', endTime);
+            activateRegisteredState(endTime);
+        };
+
+        function activateRegisteredState(endTime) {
+            btn.innerText = 'REGISTERED';
+            btn.classList.add('registered');
+            timerBlock.style.display = 'block';
+            updateTimer(endTime);
+            setInterval(() => updateTimer(endTime), 1000);
+        }
+
+        function updateTimer(endTime) {
+            const diff = endTime - Date.now();
+
+            if (diff <= 0) {
+                timer.textContent = "Giveaway ended!";
+                localStorage.removeItem('nikeGiveawayEnd');
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+            timer.textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
+        }
+    </script>
+</body>
+</html>
