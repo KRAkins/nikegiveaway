@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nike Giveaway</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        html, body {
+            margin: 0; padding: 0; overflow: hidden;
+            height: 100%; width: 100%; background: black;
+            font-family: 'Roboto', sans-serif;
+        }
+        video {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        #participate-btn {
+            position: absolute; bottom: 20%; left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 35px; font-size: 19px;
+            color: #fff; font-weight: bold;
+            border-radius: 12px;
+            background: rgba(0, 150, 255, 0.4);
+            border: 2px solid rgba(0, 150, 255, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 25px rgba(0, 150, 255, 1);
+            cursor: pointer; transition: all 0.3s;
+            z-index: 9999;
+        }
+        #participate-btn.registered {
+            background: rgba(0, 200, 50, 0.5);
+            border-color: rgba(0, 200, 50, 0.9);
+            box-shadow: 0 0 25px rgba(0, 200, 50, 1);
+        }
+        #timer-block {
+            position: absolute; bottom: 10%; left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            color: white; font-size: 18px; font-weight: 700;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 10px; text-shadow: 1px 1px 5px #000;
+            display: none; opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 9999;
+        }
+        #timer-block.show {
+            opacity: 1;
+        }
+        #error-message {
+            display: none;
+            position: absolute; top: 40%; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px 25px; border-radius: 10px;
+            color: red; font-size: 20px; font-weight: bold;
+            text-align: center;
+        }
+        #error-message a {
+            color: blue; text-decoration: none;
+            font-weight: bold; display: block; margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop playsinline>
+        <source src="video.mp4" type="video/mp4">
+    </video>
+
+    <div id="error-message">
+        ❌ You are not subscribed! <br>
+        <a href="https://t.me/RTFKTxNIKEnft">🔥 Подписаться</a>
+    </div>
+
+    <button id="participate-btn">PARTICIPATE</button>
+    <div id="timer-block">Giveaway ends in: <span id="timer"></span></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        async function checkSubscription() {
+            const userId = tg.initDataUnsafe?.user?.id;
+            if (!userId) {
+                alert("Ошибка: не удалось получить ID пользователя.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot8166268833:AAGwIkGiD0RtaVCEWWTUMbEvzqW8pM4RgTA/getChatMember?chat_id=@RTFKTxNIKEnft&user_id=${userId}`);
+                const data = await response.json();
+                const status = data?.result?.status;
+
+                if (!["member", "administrator", "creator"].includes(status)) {
+                    document.getElementById("error-message").style.display = "block";
+                    document.getElementById("participate-btn").style.display = "none";
+                } else {
+                    document.getElementById("error-message").style.display = "none";
+                    document.getElementById("participate-btn").style.display = "block";
+                }
+            } catch (error) {
+                console.error("Ошибка проверки подписки:", error);
+            }
+        }
+
+        checkSubscription();
+    </script>
+</body>
+</html>
+
